@@ -20,6 +20,8 @@ import hytools_lite as htl
 from hytools_lite.io.envi import WriteENVI
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.manifold import MDS
+
 
 def progbar(curr, total, full_progbar = 100):
     '''Display progress bar.
@@ -62,18 +64,11 @@ def main():
 
     args = parser.parse_args()
 
-    # parser = argparse.ArgumentParser()
-    # args = parser.parse_args([])
-    # args.in_file = '/data2/prisma/rfl/PRS_20210604101721_20210604101725_0001_srtm/output/PRS_20210604101721_20210604101725_0001_rfl_prj_rfl'
-    # args.out_dir ='/data1/temp/'
-    # args.pca = True
-    # args.species = True
-    # args.window = 5
-    # args.clusters = 25
-
     rfl = htl.HyTools()
     rfl.read_file(args.rfl_file,'envi')
-    rfl.mask['sample'] = rfl.ndi() > .3
+
+    ndvi_thres = .3
+    rfl.mask['sample'] = rfl.ndi() > ndvi_thres
 
     # Sample data
     X  = subsample(rfl,.1)
@@ -115,7 +110,7 @@ def main():
     if args.pca:
         header = rfl.get_header()
         header['bands']= comps
-        header['band names']= ['pca_%02d' for band in range(comps)]
+        header['band names']= ['pca_%02d' % band for band in range(comps)]
         header['wavelength']= []
         header['fwhm']= []
         out_file = args.out_dir + rfl.base_name + '_pca'
@@ -128,6 +123,7 @@ def main():
     clusters = KMeans(n_clusters=25)
     clusters.fit(pca_sample)
     classes = clusters.predict(pca_transform.reshape(rfl.lines*rfl.columns,comps)).reshape(rfl.lines,rfl.columns)
+    classes[rfl.ndi() < ndvi_thres] = rfl.no_data
 
     if args.species:
         header = rfl.get_header()
@@ -135,7 +131,6 @@ def main():
         header['band names']= ['species']
         header['wavelength']= []
         header['fwhm']= []
-        classes[rfl.ndi() < .3] = rfl.no_data
         out_file = args.out_dir + rfl.base_name + '_species'
         writer = WriteENVI(out_file,header)
         writer.write_band(classes,0)
@@ -145,13 +140,13 @@ def main():
 
     for line in range(args.window,rfl.lines-args.window):
         for col in range(args.window,rfl.columns-args.window):
-            neighborhood = classes[line-args.window:line+args.window,col-args.window:col+args.window]
-            neighborhood = neighborhood[neighborhood!=rfl.no_data]
+            nbhd = classes[line-args.window:line+args.window,col-args.window:col+args.window]
+            nbhd = nbhd[nbhd!=rfl.no_data]
 
-            neigh_sum= np.array(list(Counter(neighborhood.flatten()).values()))
+            nbhd_sum= np.array(list(Counter(nbhd.flatten()).values()))
 
-            sh = -np.sum(neigh_sum/neigh_sum.sum() * np.log(neigh_sum/neigh_sum.sum()))
-            sim = 1- ((neigh_sum*(neigh_sum-1)).sum())/(neigh_sum.sum()*(neigh_sum.sum()-1))
+            sh = -np.sum(nbhd_sum/nbhd_sum.sum() * np.log(nbhd_sum/nbhd_sum.sum()))
+            sim = 1- ((nbhd_sum*(nbhd_sum-1)).sum())/(nbhd_sum.sum()*(nbhd_sum.sum()-1))
 
             shannon[line,col] = sh
             simpson[line,col] = sim
@@ -159,13 +154,14 @@ def main():
             progbar(line,rfl.lines, full_progbar = 100)
 
     #Export diversity indices
-    out_file = args.out_dir + rfl.base_name + '_diversity'
+    out_file = args.out_dir + rfl.base_name + '_alpha_diversity'
     header = rfl.get_header()
     header['bands']= 2
     header['band names']= ['shannon','simpson']
     writer = WriteENVI(out_file,header)
     writer.write_band(shannon[:,:],0)
     writer.write_band(simpson[:,:],1)
+
 
 def subsample(hy_obj,sample_size):
 
