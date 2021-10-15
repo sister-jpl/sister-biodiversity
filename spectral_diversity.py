@@ -279,7 +279,7 @@ def main():
     full_coords = np.zeros((bray_curtis.shape[0],3))
     full_coords[bray_curtis.sum(axis=0) != bray_curtis.shape[0]*-4] = coords
 
-    image_blocks = view_as_blocks(classes[:1150,:1150],(args.window,args.window))
+    image_blocks = view_as_blocks(classes[:line_end,:column_end],(args.window,args.window))
     beta = full_coords.reshape((image_blocks.shape[0],image_blocks.shape[1],3))
     beta[image_blocks.mean(axis = (2,3))<0] = np.nan
 
@@ -288,7 +288,7 @@ def main():
     header['band names']= ['species']
     header['wavelength']= []
     header['lines']= beta.shape[0]
-    header['samples']= beta.shape[0]
+    header['samples']= beta.shape[1]
     pixel_x,pixel_y =header['map info'][5:7]
     header['map info'][5:7] = [str(float(pixel_x)*args.window),
                                str(float(pixel_y)*args.window)]
