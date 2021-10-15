@@ -2,5 +2,5 @@
 hy-tools-lite
 numba
 numpy
-scipy
+scikit-learn
 scikit-image
