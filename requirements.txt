@@ -1,0 +1,6 @@
+# sister-biodiversity dependencies
+hy-tools-lite
+numba
+numpy
+scipy
+scikit-image
