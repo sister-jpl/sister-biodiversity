@@ -155,8 +155,8 @@ def main():
                         help='Output directory')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--nclusters', type=int, default=25,
-                        help='Export PCA image')
-    parser.add_argument('--window', type=int, default=5,
+                        help='Number of k-means cluster')
+    parser.add_argument('--window', type=int, default=10,
                         help='Window size for calculating diversity metrics')
     parser.add_argument('--pca', action='store_true',
                         help='Export PCA image')
