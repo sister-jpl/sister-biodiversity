@@ -263,7 +263,7 @@ def main():
     if args.verbose:
         print("Calculating dissimilarity matrix.......")
 
-    bray_curtis = calc_bray_curtis_blocks(image_blocks,classes,args.nclusters)
+    bray_curtis = calc_bray_curtis_blocks(image_blocks,args.nclusters)
 
     #Filter dissimilarity matrix
     bc_filt = bray_curtis[:,bray_curtis.sum(axis=0) != bray_curtis.shape[1]*-4]
