@@ -3,7 +3,7 @@
 This repository contains code for calculating alpha and beta spectral diversity metrics. Methods were
 adapted from Féret & de Boissieu (2020) but do not exactly replicate their techniques. We have included a
 command line script, which can automatically generate diversity metrics with user specfied parameters,
-along with an [interactive Jupyter notebook] (https://github.com/EnSpec/sister-biodiversity/blob/main/spectral_diversity.ipynb) (*recommended*).
+along with an [interactive Jupyter notebook](https://github.com/EnSpec/sister-biodiversity/blob/main/spectral_diversity.ipynb) (*recommended*).
 
 
 Féret, J. B., & de Boissieu, F. (2020).
