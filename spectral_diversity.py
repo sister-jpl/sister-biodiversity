@@ -104,7 +104,7 @@ def calc_alpha(classes,window,nclusters):
     windows_pixels = window**2
 
     lines = classes.shape[0]
-    columns = classes.shape[0]
+    columns = classes.shape[1]
 
     half_window = int(window/2)
 
